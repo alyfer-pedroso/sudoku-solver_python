@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox
 import random
 
 class SudokuGUI:
@@ -9,16 +9,16 @@ class SudokuGUI:
         self.root.configure(background="#d4d4d4")
         self.solutioned = False
         
-        self.size = 9  # Tamanho inicial do Sudoku
-        self.entries = []  # Lista de campos de entrada
-        self.sudoku = []  # Tabuleiro do Sudoku
+        self.size = 9  # initial sudoku size
+        self.entries = []  # list of entries fields
+        self.sudoku = []  # sudoku board
         self.invalid = False
 
         self.default_color = "white"
-        self.selected_color = "#405dff"  # Cor de destaque (vermelho claro)
+        self.selected_color = "#405dff"  # selected cell color
         self.update_delay = 0 # delay in ms
 
-        # Frame para os controles no topo
+        # top control frame
         control_frame = tk.Frame(root, background="#d4d4d4")
         control_frame.pack(pady=10)
 
@@ -29,8 +29,8 @@ class SudokuGUI:
         self.size_entry = tk.Entry(control_frame, textvariable=self.size_var, width=5)
         self.size_entry.grid(row=0, column=1, padx=5)
 
-        self.size_label = tk.Label(control_frame, background="#d4d4d4", text="Delay de resolução (ms):")
-        self.size_label.grid(row=1, column=0, padx=5)
+        self.delay_label = tk.Label(control_frame, background="#d4d4d4", text="Delay de resolução (ms):")
+        self.delay_label.grid(row=1, column=0, padx=5)
 
         self.delay_var = tk.StringVar(value=str(self.update_delay))
         self.delay_entry = tk.Entry(control_frame, textvariable=self.delay_var, width=5)
@@ -45,11 +45,11 @@ class SudokuGUI:
         self.solve_button = tk.Button(control_frame, text="Solucionar Sudoku", command=self.solve_sudoku)
         self.solve_button.grid(row=0, column=4, padx=5)
 
-        # Frame para a grade de Sudoku
+        # sudoku grid frame
         self.grid_frame = tk.Frame(root)
         self.grid_frame.pack(pady=10)
 
-        # Cria a grade inicial
+        # create initial grid
         self.create_sudoku()
 
     def create_sudoku(self):
@@ -59,7 +59,7 @@ class SudokuGUI:
             messagebox.showerror("Cuidado!", "O tamanho da grade deve ser um número inteiro.")
             return 
         
-        # Limpa a grade anterior
+        # clear last grid
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
 
@@ -77,7 +77,7 @@ class SudokuGUI:
                 entry = tk.Entry(self.grid_frame, width=4, justify="center", font=("Arial", 14), relief="solid", bd=1, background="white")
                 entry.grid(row=i, column=j, padx=0, pady=0, ipady=8)
                 
-                # Evento de seleção da célula
+                # cell event selecion
                 entry.bind("<FocusIn>", lambda e, row=i, col=j: self.on_entry_focus(row, col))
                 entry.bind("<FocusOut>", lambda e: self.restore_colors())
 
@@ -124,12 +124,12 @@ class SudokuGUI:
         """ Destaca a linha, coluna e subgrade da célula selecionada, incluindo as desativadas. """
         base = int(self.size ** 0.5)
         
-        # Destacar linha e coluna
+        # highlight row and column
         for i in range(self.size):
-            self.highlight_entry(self.entries[row][i])  # Linha
-            self.highlight_entry(self.entries[i][col])  # Coluna
+            self.highlight_entry(self.entries[row][i])  # row
+            self.highlight_entry(self.entries[i][col])  # col
         
-        # Destacar subgrade
+        # highlight subgrid
         start_row, start_col = base * (row // base), base * (col // base)
         for i in range(start_row, start_row + base):
             for j in range(start_col, start_col + base):
@@ -261,7 +261,7 @@ class SudokuGUI:
         return True
 
     def update_entries_with_delay(self, board, row=0, col=0):
-        """ Atualiza as células uma a uma com um atraso. """
+        # refresh cells with delay
         if row >= self.size:
             return
         entry = self.entries[row][col]
@@ -272,14 +272,14 @@ class SudokuGUI:
         else:
             entry.config(disabledbackground="#f0f0f0")
 
-        # Proximo item
+        # next item
         if col < self.size - 1:
             self.root.after(self.update_delay, self.update_entries_with_delay, board, row, col + 1)
         elif row < self.size - 1:
             self.root.after(self.update_delay, self.update_entries_with_delay, board, row + 1, 0)
 
     def update_entries(self, board):
-        """ Atualiza as células com um atraso. """
+        # refresh cells with delay
         self.update_delay = int(self.delay_var.get())
         self.update_entries_with_delay(board)
 
