@@ -121,7 +121,7 @@ class SudokuGUI:
         if self.solutioned:
             return
         
-        """ Destaca a linha, coluna e subgrade da célula selecionada, incluindo as desativadas. """
+        # highlights the row, column and sub-grid of the selected cell, including disabled cells
         base = int(self.size ** 0.5)
         
         # highlight row and column
@@ -138,8 +138,8 @@ class SudokuGUI:
     def highlight_entry(self, entry):
         if self.solutioned:
             return
-        
-        """ Destaca uma célula, seja ela desativada ou normal. """
+
+        # highlights a cell, whether it is deactivated or normal
         if entry["state"] == "normal":
             entry.config(background=self.selected_color)
         elif entry["state"] == "disabled":
@@ -149,7 +149,7 @@ class SudokuGUI:
         if self.solutioned:
             return
         
-        """ Restaura as cores das células para o estado original. """
+        # restores cell colors to their original state
         for row_entries in self.entries:
             for entry in row_entries:
                 if entry["state"] == "normal":
@@ -161,7 +161,7 @@ class SudokuGUI:
         if self.solutioned:
             return
         
-        """ Callback quando uma célula é selecionada. """
+        # callback when a cell is selected
         self.restore_colors()
         self.highlight_related_cells(row, col)
 
