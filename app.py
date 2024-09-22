@@ -12,11 +12,12 @@ class SudokuGUI:
         self.size = 9  # initial sudoku size
         self.entries = []  # list of entries fields
         self.sudoku = []  # sudoku board
+        self.solutioned_sudoku = []
         self.invalid = False
+        self.memorized_solution = False
 
         self.default_color = "white"
         self.selected_color = "#405dff"  # selected cell color
-        self.update_delay = 0 # delay in ms
 
         # top control frame
         control_frame = tk.Frame(root, background="#d4d4d4")
@@ -29,12 +30,11 @@ class SudokuGUI:
         self.size_entry = tk.Entry(control_frame, textvariable=self.size_var, width=5)
         self.size_entry.grid(row=0, column=1, padx=5)
 
-        self.delay_label = tk.Label(control_frame, background="#d4d4d4", text="Delay de resolução (ms):")
-        self.delay_label.grid(row=1, column=0, padx=5)
+        self.memorized_solution_label = tk.Label(control_frame, background="#d4d4d4", text="Solução memorizada:")
+        self.memorized_solution_label.grid(row=1, column=0, padx=5)
 
-        self.delay_var = tk.StringVar(value=str(self.update_delay))
-        self.delay_entry = tk.Entry(control_frame, textvariable=self.delay_var, width=5)
-        self.delay_entry.grid(row=1, column=1, padx=5)
+        self.memorized_solution_button = tk.Button(control_frame, width=10, text=self.memorized_solution and "Ativado" or "Desativado", background=self.memorized_solution and "green" or "red", foreground="white", state=self.solutioned and "disabled" or "normal", command=self.toggle_memorized_solution)
+        self.memorized_solution_button.grid(row=1, column=1, padx=5)
 
         self.create_grid_button = tk.Button(control_frame, text="Gerar Sudoku", command=self.create_sudoku)
         self.create_grid_button.grid(row=0, column=2, padx=5)
@@ -64,6 +64,7 @@ class SudokuGUI:
             widget.destroy()
 
         self.entries = []
+        self.solutioned_sudoku = []
         self.sudoku = self.generate_sudoku(self.size)
 
         if self.invalid:
@@ -110,9 +111,11 @@ class SudokuGUI:
         nums = shuffle(range(1, size + 1))
 
         board = [[nums[pattern(r, c)] for c in cols] for r in rows]
+        self.solutioned_sudoku = [[nums[pattern(r, c)] for c in cols] for r in rows]
 
         squares = size * size
         empties = squares * 3 // 4
+
         for p in random.sample(range(squares), empties):
             board[p // size][p % size] = 0
 
@@ -215,6 +218,12 @@ class SudokuGUI:
                 row.append(value)
             board.append(row)
         return board
+    
+    def toggle_memorized_solution(self):
+        if self.solutioned:
+            return
+        self.memorized_solution = not self.memorized_solution
+        self.memorized_solution_button.config(text=self.memorized_solution and "Ativado" or "Desativado", background=self.memorized_solution and "green" or "red", foreground="white", state=self.solutioned and "disabled" or "normal")
 
     def solve_sudoku(self):
         if self.solutioned:
@@ -224,7 +233,7 @@ class SudokuGUI:
             messagebox.showerror("Error", "Sudoku inválido.")
             return
         
-        board = self.get_board_from_entries()
+        board = self.memorized_solution and self.solutioned_sudoku or self.get_board_from_entries()
         if self.solve(board):
             self.update_entries(board)
             self.solutioned = True
@@ -269,28 +278,17 @@ class SudokuGUI:
 
         return True
 
-    def update_entries_with_delay(self, board, row=0, col=0):
-        # refresh cells with delay
-        if row >= self.size:
-            return
-        entry = self.entries[row][col]
-        if entry["state"] == "normal":
-            entry.delete(0, tk.END)
-            entry.insert(0, str(board[row][col]))
-            entry.config(state="readonly", readonlybackground="#9ccc75")
-        else:
-            entry.config(disabledbackground="#f0f0f0")
-
-        # next item
-        if col < self.size - 1:
-            self.root.after(self.update_delay, self.update_entries_with_delay, board, row, col + 1)
-        elif row < self.size - 1:
-            self.root.after(self.update_delay, self.update_entries_with_delay, board, row + 1, 0)
-
     def update_entries(self, board):
-        # refresh cells with delay
-        self.update_delay = int(self.delay_var.get())
-        self.update_entries_with_delay(board)
+        size = len(board)
+        for row in range(size):
+            for col in range(size):
+                entry = self.entries[row][col]
+                if entry["state"] == "normal":
+                    entry.delete(0, tk.END)
+                    entry.insert(0, str(board[row][col]))
+                    entry.config(state="readonly", readonlybackground="#9ccc75")
+                else:
+                    entry.config(disabledbackground="#f0f0f0")
 
 
 if __name__ == "__main__":
