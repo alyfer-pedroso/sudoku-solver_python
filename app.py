@@ -80,6 +80,7 @@ class SudokuGUI:
                 # cell event selecion
                 entry.bind("<FocusIn>", lambda e, row=i, col=j: self.on_entry_focus(row, col))
                 entry.bind("<FocusOut>", lambda e: self.restore_colors())
+                entry.bind("<KeyRelease>", lambda e, entry=entry: self.validate_entry(entry))
 
                 if value != 0:
                     entry.insert(0, str(value))
@@ -165,6 +166,13 @@ class SudokuGUI:
         self.restore_colors()
         self.highlight_related_cells(row, col)
 
+    def validate_entry(self, entry):
+        value = entry.get()
+        try:
+            int(value)
+        except ValueError:
+            entry.delete(0, tk.END)
+
     def validate_sudoku(self):
         if self.invalid:
             messagebox.showerror("Error", "Sudoku inválido.")
@@ -203,6 +211,7 @@ class SudokuGUI:
                     value = int(entry.get())
                 except ValueError:
                     value = 0
+                    entry.delete(0, tk.END)
                 row.append(value)
             board.append(row)
         return board
@@ -282,6 +291,7 @@ class SudokuGUI:
         # refresh cells with delay
         self.update_delay = int(self.delay_var.get())
         self.update_entries_with_delay(board)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
