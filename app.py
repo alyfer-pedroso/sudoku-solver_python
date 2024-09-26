@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import random
+import os
 
 class SudokuGUI:
     def __init__(self, root):
@@ -8,13 +9,16 @@ class SudokuGUI:
         self.root.title("Sudoku Dinâmico")
         self.root.configure(background="#d4d4d4")
         self.solutioned = False
+
+        # dev - config
+        self.console = False
         
         self.size = 9  # initial sudoku size
         self.entries = []  # list of entries fields
         self.sudoku = []  # sudoku board
         self.solutioned_sudoku = []
         self.invalid = False
-        self.memorized_solution = False
+        self.memorized_solution = True
 
         self.default_color = "white"
         self.selected_color = "#405dff"  # selected cell color
@@ -30,27 +34,28 @@ class SudokuGUI:
         self.size_entry = tk.Entry(control_frame, textvariable=self.size_var, width=5)
         self.size_entry.grid(row=0, column=1, padx=5)
 
-        self.memorized_solution_label = tk.Label(control_frame, background="#d4d4d4", text="Solução memorizada:")
-        self.memorized_solution_label.grid(row=1, column=0, padx=5)
-
-        self.memorized_solution_button = tk.Button(control_frame, width=10, text=self.memorized_solution and "Ativado" or "Desativado", background=self.memorized_solution and "green" or "red", foreground="white", state=self.solutioned and "disabled" or "normal", command=self.toggle_memorized_solution)
-        self.memorized_solution_button.grid(row=1, column=1, padx=5)
-
         self.create_grid_button = tk.Button(control_frame, text="Gerar Sudoku", command=self.create_sudoku)
         self.create_grid_button.grid(row=0, column=2, padx=5)
 
-        self.validate_button = tk.Button(control_frame, text="Validar Sudoku", command=self.validate_sudoku)
-        self.validate_button.grid(row=0, column=3, padx=5)
+        if not self.console:
+            self.memorized_solution_label = tk.Label(control_frame, background="#d4d4d4", text="Solução memorizada:")
+            self.memorized_solution_label.grid(row=1, column=0, padx=5)
 
-        self.solve_button = tk.Button(control_frame, text="Solucionar Sudoku", command=self.solve_sudoku)
-        self.solve_button.grid(row=0, column=4, padx=5)
+            self.memorized_solution_button = tk.Button(control_frame, width=10, text=self.memorized_solution and "Ativado" or "Desativado", background=self.memorized_solution and "green" or "red", foreground="white", state=self.solutioned and "disabled" or "normal", command=self.toggle_memorized_solution)
+            self.memorized_solution_button.grid(row=1, column=1, padx=5)
+
+            self.validate_button = tk.Button(control_frame, text="Validar Sudoku", command=self.validate_sudoku)
+            self.validate_button.grid(row=0, column=3, padx=5)
+
+            self.solve_button = tk.Button(control_frame, text="Solucionar Sudoku", command=self.solve_sudoku)
+            self.solve_button.grid(row=0, column=4, padx=5)
 
         # sudoku grid frame
         self.grid_frame = tk.Frame(root)
         self.grid_frame.pack(pady=10)
 
         # create initial grid
-        self.create_sudoku()
+        if not self.console: self.create_sudoku()
 
     def create_sudoku(self):
         try:
@@ -67,7 +72,7 @@ class SudokuGUI:
         self.solutioned_sudoku = []
         self.sudoku = self.generate_sudoku(self.size)
 
-        if self.invalid:
+        if self.invalid or self.console:
             return
 
         for i in range(self.size):
@@ -112,6 +117,18 @@ class SudokuGUI:
 
         board = [[nums[pattern(r, c)] for c in cols] for r in rows]
         self.solutioned_sudoku = [[nums[pattern(r, c)] for c in cols] for r in rows]
+
+        if self.console:
+            if os.name == 'nt':
+                os.system('cls')
+            else:
+                os.system('clear')
+                
+            print("[")
+            for i in range(size):
+                space = i != size - 1 and "," or ""
+                print("  " + str(board[i]) + space)
+            print("]")
 
         squares = size * size
         empties = squares * 3 // 4
