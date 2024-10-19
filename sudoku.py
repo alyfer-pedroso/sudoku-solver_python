@@ -1,5 +1,5 @@
 import tkinter as tk
-import random, os
+import random, os, gc
 from tkinter import messagebox
 
 def create_sudoku(self):
@@ -18,6 +18,13 @@ def create_sudoku(self):
     self.entries = [] # Array with sudoku's row and within them the cells
     self.solutioned_sudoku = []
     self.sudoku = generate_sudoku(self, self.size) # Generates the grid
+
+    if self.console:
+        print("start: [")
+        for i in range(self.size):
+            space = i != self.size - 1 and "," or ""
+            print("  " + str(self.sudoku[i]) + space)
+        print("]: end")
 
     # Check for invalid sudoku size and whether console mode is on
     if self.invalid or self.console:
@@ -44,6 +51,8 @@ def create_sudoku(self):
             row_entries.append(entry)
         # Adds the row to the grid
         self.entries.append(row_entries)
+
+    gc.collect()
     
 def generate_sudoku(self, size):
     self.solutioned = False
@@ -75,17 +84,19 @@ def generate_sudoku(self, size):
         else:
             os.system('clear')
             
-        print("[")
-        for i in range(size):
-            space = i != size - 1 and "," or ""
-            print("  " + str(board[i]) + space)
-        print("]")
+        # print("[")
+        # for i in range(size):
+        #     space = i != size - 1 and "," or ""
+        #     print("  " + str(board[i]) + space)
+        # print("]")
 
     squares = size * size
     empties = squares * 3 // 4
 
     for p in random.sample(range(squares), empties):
         board[p // size][p % size] = 0
+
+    gc.collect()
 
     return board
 
@@ -113,6 +124,8 @@ def solve_sudoku(self):
         self.solutioned = True
     else:
         messagebox.showerror("Error", "Sudoku não pode ser solucionado.")
+    
+    gc.collect()
 
 def solve(self, board):
     size = len(board)

@@ -12,7 +12,7 @@ class SudokuGUI:
         self.solutioned = False
 
         # Sets the app to the console mode
-        self.console = False
+        self.console = True
         
         self.size = 9  # initial sudoku size
         self.entries = []  # list of entries fields
