@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import messagebox
 import sudoku
 
 # This class defines the GUI
@@ -12,7 +11,7 @@ class SudokuGUI:
         self.solutioned = False
 
         # Sets the app to the console mode
-        self.console = True
+        self.console = False
         
         self.size = 9  # initial sudoku size
         self.entries = []  # list of entries fields

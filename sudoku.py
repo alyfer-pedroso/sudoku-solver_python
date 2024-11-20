@@ -93,8 +93,9 @@ def generate_sudoku(self, size):
     squares = size * size
     empties = squares * 3 // 4
 
-    # for p in random.sample(range(squares), empties):
-    #     board[p // size][p % size] = 0
+    if not self.console:
+        for p in random.sample(range(squares), empties):
+            board[p // size][p % size] = 0
 
     gc.collect()
 
